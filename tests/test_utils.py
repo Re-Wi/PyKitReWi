@@ -1,8 +1,10 @@
+import asyncio
 import time
 
 from PySide6.QtCore import Signal
 
 from utils.common import commonProgram
+
 
 class UtilsExample:
     # 声明带一个字典类型参数的信号
@@ -24,43 +26,35 @@ class UtilsExample:
         # self.RecvDataHandle(dictData)
         pass
 
+
 # 引入配置文件
 myConfig = commonProgram.EnableConfigHandler()
 print(f'{__name__} get config Version', myConfig.version)
-tracker = commonProgram.EnableTimeTracker()
+time_tracker = commonProgram.EnableTimeTracker()
 
 
-@tracker.track_time
-def example_function(x: int) -> None:
-    """
-    Example function that sleeps for x seconds to simulate work.
-
-    Args:
-        x (int): Number of seconds to sleep.
-    """
-    time.sleep(x)
+@time_tracker.track_time
+def sync_example():
+    time.sleep(1)
+    return "Synchronous Done"
 
 
-@tracker.track_time
-def another_function(y: float) -> None:
-    """
-    Another example function that sleeps for y seconds to simulate work.
-
-    Args:
-        y (float): Number of seconds to sleep.
-    """
-    time.sleep(y)
+@time_tracker.track_time
+async def async_example():
+    await asyncio.sleep(1)
+    return "Asynchronous Done"
 
 
 if __name__ == "__main__":
-    # Simulate calling the functions multiple times
-    example_function(1)
-    example_function(2)
-    another_function(1.5)
-    another_function(2.5)
+    # 多次调用同步函数
+    for _ in range(3):
+        sync_example()
 
-    # Log execution time for a specific function
-    tracker.log_single_time("example_function")
+    # 多次调用异步函数
+    asyncio.run(async_example())
 
-    # Log execution time summary for all tracked functions
-    tracker.log_all_times()
+    # 输出所有函数的执行时间
+    time_tracker.log_all_times()
+
+    # 输出特定函数的执行时间
+    time_tracker.log_single_time("sync_example")

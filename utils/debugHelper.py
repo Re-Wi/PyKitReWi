@@ -1,6 +1,8 @@
 import time
+import asyncio
 from loguru import logger
-from typing import Callable, Any, List, Dict
+from typing import Callable, Any, Dict, List, Union
+from functools import wraps
 
 
 class TimeTracker:
@@ -14,7 +16,8 @@ class TimeTracker:
 
     def track_time(self, func: Callable) -> Callable:
         """
-        Decorator function that wraps a given function and tracks its execution time.
+        Decorator function that wraps a given function (synchronous or asynchronous)
+        and tracks its execution time.
 
         Args:
             func (Callable): The function whose execution time is to be tracked.
@@ -23,7 +26,31 @@ class TimeTracker:
             Callable: The wrapped function with time-tracking functionality.
         """
 
-        def wrapper(*args: Any, **kwargs: Any) -> Any:
+        @wraps(func)
+        async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
+            # Record start time
+            start_time = time.time()
+
+            # Execute the original function and get its result
+            result = await func(*args, **kwargs)
+
+            # Record end time
+            end_time = time.time()
+
+            # Calculate the time it took to execute the function
+            exec_time = end_time - start_time
+
+            # Log the execution time using loguru
+            logger.info(f"{func.__name__} took {exec_time:.6f} seconds to execute")
+
+            # Store the execution time in the times dictionary
+            self._store_time(func.__name__, exec_time)
+
+            # Return the original result of the function
+            return result
+
+        @wraps(func)
+        def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
             # Record start time
             start_time = time.time()
 
@@ -40,15 +67,26 @@ class TimeTracker:
             logger.info(f"{func.__name__} took {exec_time:.6f} seconds to execute")
 
             # Store the execution time in the times dictionary
-            if func.__name__ in self.times:
-                self.times[func.__name__].append(exec_time)
-            else:
-                self.times[func.__name__] = [exec_time]
+            self._store_time(func.__name__, exec_time)
 
             # Return the original result of the function
             return result
 
-        return wrapper
+        # Check if the function is asynchronous or synchronous and return the appropriate wrapper
+        return async_wrapper if asyncio.iscoroutinefunction(func) else sync_wrapper
+
+    def _store_time(self, func_name: str, exec_time: float) -> None:
+        """
+        Stores the execution time in the times dictionary.
+
+        Args:
+            func_name (str): The name of the function.
+            exec_time (float): The execution time of the function.
+        """
+        if func_name in self.times:
+            self.times[func_name].append(exec_time)
+        else:
+            self.times[func_name] = [exec_time]
 
     def log_all_times(self) -> None:
         """

@@ -8,7 +8,7 @@ class CommonProgram:
     公用程序，会被多个程序多次重复调用的程序
     """
     __myConfig = None
-    __tracker = None
+    __time_tracker = None
     __serialPortWin = None
     __logsRecorder = None
     __datasRecorder = None
@@ -37,9 +37,9 @@ class CommonProgram:
         Enable the Time Tracker module
         """
         from utils.debugHelper import TimeTracker
-        if type(self.__tracker) != type(TimeTracker()):
-            self.__tracker = TimeTracker()
-        return self.__tracker
+        if type(self.__time_tracker) != type(TimeTracker()):
+            self.__time_tracker = TimeTracker()
+        return self.__time_tracker
 
     def UpdateScreenResolution(self):  # 更新全局配置中显示器分辨率
         """ Updated the monitor resolution in Global configuration """
