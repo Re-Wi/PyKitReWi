@@ -2,8 +2,7 @@ import time
 
 from PySide6.QtCore import Signal
 
-from src.utils.debugHelper import TimeTracker
-
+from utils.common import commonProgram
 
 class UtilsExample:
     # 声明带一个字典类型参数的信号
@@ -11,7 +10,7 @@ class UtilsExample:
 
     def __init__(self):
         # 引入公共程序
-        from src.utils.common import commonProgram
+        from utils.common import commonProgram
         # 引入配置文件
         self.myConfig = commonProgram.EnableConfigHandler()
         print('MainWindow get config Version', self.myConfig.version)
@@ -25,8 +24,10 @@ class UtilsExample:
         # self.RecvDataHandle(dictData)
         pass
 
-
-tracker = TimeTracker()
+# 引入配置文件
+myConfig = commonProgram.EnableConfigHandler()
+print(f'{__name__} get config Version', myConfig.version)
+tracker = commonProgram.EnableTimeTracker()
 
 
 @tracker.track_time
