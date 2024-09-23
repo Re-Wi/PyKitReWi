@@ -34,26 +34,42 @@ time_tracker = commonProgram.EnableTimeTracker()
 
 
 @time_tracker.track_time
-def sync_example():
-    time.sleep(1)
-    print("Synchronous Done")
+def sync_example(x):
+    time.sleep(x)
+    print("Synchronous Done --> ", x)
+    return x * 2
 
 
 @time_tracker.track_time
-async def async_example():
-    await asyncio.sleep(1)
-    print("Asynchronous Done")
+async def async_example(x):
+    await asyncio.sleep(x)
+    print("Asynchronous Done --> ", x)
+    return x * 3
 
 
 if __name__ == "__main__":
     # 多次调用同步函数
-    for _ in range(3):
-        sync_example()
+    for i in range(6):
+        sync_example(i)
+
 
     # 多次调用异步函数
-    asyncio.run(async_example())
+    async def main():
+        # Call async_example multiple times
+        await asyncio.gather(
+            async_example(1),
+            async_example(2),
+            async_example(3),
+            async_example(4),
+            async_example(5),
+            async_example(6),
+        )
 
-    # 输出所有函数的执行时间
+
+    # Run the main async function
+    asyncio.run(main())
+
+    # Log all tracked function times
     time_tracker.log_all_times()
 
     # 输出特定函数的执行时间
