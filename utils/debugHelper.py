@@ -1,9 +1,8 @@
 import time
 import asyncio
 from loguru import logger
-from typing import Callable, Any, Dict, List, Union
+from typing import Callable, Any, Dict, List
 from functools import wraps
-
 
 class TimeTracker:
     def __init__(self):
@@ -25,81 +24,66 @@ class TimeTracker:
         Returns:
             Callable: The wrapped function with time-tracking functionality.
         """
-
         @wraps(func)
         async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
             # Record start time
             start_time = time.time()
+            start_timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start_time))
 
             # Execute the original function and get its result
             result = await func(*args, **kwargs)
 
             # Record end time
             end_time = time.time()
-
-            # Calculate the time it took to execute the function
             exec_time = end_time - start_time
 
             # Log the execution time using loguru
-            logger.info(f"{func.__name__} took {exec_time:.6f} seconds to execute")
+            logger.info(f"[{start_timestamp}] {func.__name__} took {exec_time:.6f} seconds to execute")
 
             # Store the execution time in the times dictionary
             self._store_time(func.__name__, exec_time)
 
-            # Return the original result of the function
             return result
 
         @wraps(func)
         def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
             # Record start time
             start_time = time.time()
+            start_timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start_time))
 
             # Execute the original function and get its result
             result = func(*args, **kwargs)
 
             # Record end time
             end_time = time.time()
-
-            # Calculate the time it took to execute the function
             exec_time = end_time - start_time
 
             # Log the execution time using loguru
-            logger.info(f"{func.__name__} took {exec_time:.6f} seconds to execute")
+            logger.info(f"[{start_timestamp}] {func.__name__} took {exec_time:.6f} seconds to execute")
 
             # Store the execution time in the times dictionary
             self._store_time(func.__name__, exec_time)
 
-            # Return the original result of the function
             return result
 
         # Check if the function is asynchronous or synchronous and return the appropriate wrapper
         return async_wrapper if asyncio.iscoroutinefunction(func) else sync_wrapper
 
     def _store_time(self, func_name: str, exec_time: float) -> None:
-        """
-        Stores the execution time in the times dictionary.
-
-        Args:
-            func_name (str): The name of the function.
-            exec_time (float): The execution time of the function.
-        """
+        """Stores the execution time in the times dictionary."""
         if func_name in self.times:
             self.times[func_name].append(exec_time)
         else:
             self.times[func_name] = [exec_time]
 
     def log_all_times(self) -> None:
-        """
-        Logs the total and average execution times for all tracked functions.
-
-        Output:
-            Logs the execution time summary for all tracked functions using loguru.
-        """
-        logger.info("Execution Time Summary:")
+        """Logs the total and average execution times for all tracked functions."""
+        logger.info("=== Execution Time Summary ===")
         for func_name, exec_times in self.times.items():
             total_time = sum(exec_times)
             avg_time = total_time / len(exec_times)
-            logger.info(f"Function: {func_name} | Total Time: {total_time:.6f}s | Average Time: {avg_time:.6f}s")
+            logger.info(f"Function: {func_name: <20} | Total Time: {total_time:.6f}s | Average Time: {avg_time:.6f}s")
+        logger.info("==============================")
 
     def log_single_time(self, func_name: str) -> None:
         """
@@ -107,14 +91,11 @@ class TimeTracker:
 
         Args:
             func_name (str): The name of the function whose execution times are to be logged.
-
-        Output:
-            Logs the total and average execution time for the specified function. If no data exists, logs a warning.
         """
         if func_name in self.times:
             exec_times = self.times[func_name]
             total_time = sum(exec_times)
             avg_time = total_time / len(exec_times)
-            logger.info(f"Function: {func_name} | Total Time: {total_time:.6f}s | Average Time: {avg_time:.6f}s")
+            logger.info(f"Function: {func_name: <20} | Total Time: {total_time:.6f}s | Average Time: {avg_time:.6f}s")
         else:
             logger.warning(f"No data found for function: {func_name}")

@@ -36,13 +36,13 @@ time_tracker = commonProgram.EnableTimeTracker()
 @time_tracker.track_time
 def sync_example():
     time.sleep(1)
-    return "Synchronous Done"
+    print("Synchronous Done")
 
 
 @time_tracker.track_time
 async def async_example():
     await asyncio.sleep(1)
-    return "Asynchronous Done"
+    print("Asynchronous Done")
 
 
 if __name__ == "__main__":
@@ -58,3 +58,4 @@ if __name__ == "__main__":
 
     # 输出特定函数的执行时间
     time_tracker.log_single_time("sync_example")
+    time_tracker.log_single_time("async_example")
