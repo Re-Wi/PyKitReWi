@@ -172,7 +172,7 @@ class CommonProgram:
         Enable the Sqlite3Handler module
         参数是保存记录的文件名（不包括后缀）
         """
-        from utils.sqlite3Handlers import Sqlite3Handler
+        from utils.sqlite3Handler import Sqlite3Handler
         if type(self.__sqlite3Handler) != type(Sqlite3Handler()):
             self.__sqlite3Handler = Sqlite3Handler()
             self.__sqlite3Handler.InitSqlite3(db_path=db_path, db_name=db_name)

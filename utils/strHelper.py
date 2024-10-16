@@ -1,4 +1,7 @@
+# -*- coding: utf-8 -*-
+import random
 import re
+import string
 
 
 def ProcessMSToHHMMSS(milliseconds):
@@ -113,3 +116,67 @@ def extract_window_classes(file_path):
 
     # 返回匹配到的模块名和类名
     return matches
+
+
+def ToUpperCamelCase(input_string):
+    """
+    转为大驼峰命名法
+    :param input_string:
+    :return:
+    """
+    words = input_string.split('_')  # 以下划线拆分字符串为单词
+    camel_case_words = [word[0].upper() + word[1:] for word in words]  # 手动将每个单词的首字母大写
+    return ''.join(camel_case_words)  # 连接单词，得到大驼峰字符串
+
+
+def FirstLetterToLower(input_string: str):
+    """
+    首字母小写
+    :param input_string:
+    :return:
+    """
+    if len(input_string) > 0:
+        return input_string[0].lower() + input_string[1:]
+    else:
+        return input_string
+
+
+def FirstLetterToUpper(input_string: str):
+    """
+    首字母大写
+    :param input_string:
+    :return:
+    """
+    if len(input_string) > 0:
+        return input_string[0].upper() + input_string[1:]
+    else:
+        return input_string
+
+
+def GenerateRandomString(length):
+    # 定义包含所有可能字符的字符集
+    characters = string.ascii_letters + string.digits + string.punctuation
+
+    # 使用 random 模块生成随机字符
+    random_string = ''.join(random.choice(characters) for _ in range(length))
+    return random_string
+
+
+################# start >>> hex_string_to_list:function <<< start #################
+def hex_string_to_list(hex_string):
+    """
+    将以空格分隔的十六进制字符串转换为整数列表。
+    :param hex_string:
+    :return:
+    """
+    hex_values = hex_string.split()  # 通过空格拆分字符串并生成十六进制值的列表
+    # print("len：", len(hex_values))
+    result = [int(hex_value, 16) for hex_value in hex_values]  # 将每个十六进制值转换为整数
+    return result
+
+
+################# end >>> hex_string_to_list:function <<< end #################
+
+# 程序入口
+if __name__ == '__main__':
+    pass

@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+import binascii
+
+from loguru import logger
+
 
 def SliceBytesSafe(data, positions):
     """
@@ -25,6 +29,39 @@ def SliceBytesSafe(data, positions):
             print(f"Illegal position: ({start}, {end}). Ignoring.")
 
     return result_array
+
+
+################# start >>> int_to_lsb_msb:function <<< start #################
+def int_to_lsb_msb(num: int):
+    """
+    :param num:int
+    :return: lsb, msb
+    """
+    lsb = num & 0xFF  # 获取最低字节
+    msb = (num >> 8) & 0xFF  # 获取次低字节
+    return lsb, msb
+
+
+################# end >>> int_to_lsb_msb:function <<< end #################
+################# start >>> BytesToHexPrint:function <<< start #################
+def BytesToHexPrint(dataObj, expectData=""):
+    # 使用hexlify函数将bytes数据转换为16进制字符串
+    hex_string = binascii.hexlify(dataObj).decode('utf-8').upper()
+    # 插入空格
+    dataObj = ' '.join(hex_string[i:i + 2] for i in range(0, len(hex_string), 2))
+    # expectData = optionsDict.get('expectData', '').strip()
+    if len(expectData) <= 0:
+        logger.info(dataObj)
+        return True
+    elif str(expectData) in str(dataObj):
+        logger.success(dataObj)
+        return True
+    else:
+        logger.error(dataObj)
+        return False
+
+
+################# end >>> BytesToHexPrint:function <<< end #################
 
 # 程序入口
 if __name__ == '__main__':
