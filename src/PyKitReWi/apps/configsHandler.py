@@ -1,7 +1,29 @@
+# -*- coding: UTF-8 -*-
+"""
+@Project    : PyKitReWi
+@File       : configsHandler.py.py
+@IDE        : PyCharm
+@Author     : ReWi  # 替换为当前系统用户名（方便开发人员区分）
+@Date       : 2024/11/23 1:52  # 日期和时间精确到秒
+@License    : MIT
+@Contact    : RejoiceWindow <RejoiceWindow@yeah.net>
+@Description: 兼容三种常用配置文件，加载到命名空间做全局变量
+@Version    : v0.0.0
+@Dependencies: 
+    - os
+    - argparse
+    - glob
+    - pyyaml   （可选）
+    - json     （可选）
+    - tomli    （可选）
+@Changelog  : 
+    - v0.0.0 (2024/11/23 1:52): Initial version, implemented the core functionality.
+    - v0.0.1 (2024/11/23 1:52)  # 记录文件版本更新的日志，例如修复的bug、增加的功能等
+"""
 import os
 import argparse
 import glob
-from .constants import DEFAULT_CONFIG
+from ..utils.constants import DEFAULT_CONFIG
 
 
 def Dict2Namespace(namespace, config):

@@ -4,7 +4,7 @@
 
 import unittest
 
-from PyKitReWi.sample.simple import add_one
+from src.PyKitReWi.sample.simple import add_one
 
 
 class TestSimple(unittest.TestCase):

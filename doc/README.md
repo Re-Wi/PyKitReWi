@@ -60,3 +60,5 @@ pip install .\dist\PyKitReWi + <Tab 键>
 
 1. 进入 tests 文件夹
 2. 新建 test_* 文件自测
+
+[程序结构](./structure.md)
