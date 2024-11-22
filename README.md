@@ -12,7 +12,7 @@ recommendations for version control, documentation, or testing.
 
 [The source for this project is available here][src].
 
-Most of the configuration for a Python project is done in the `setup.py` file,
+The metadata for a Python project is defined in the `pyproject.toml` file,
 an example of which is included in this project. You should edit this file
 accordingly to adapt this sample project to your needs.
 
@@ -35,7 +35,7 @@ may be appropriate.
 
 [distribution tutorial]: https://packaging.python.org/tutorials/packaging-projects/
 
-[src]: https://github.com/Re-Wi/PyKitReWi
+[src]: https://github.com/pypa/sampleproject
 
 [rst]: http://docutils.sourceforge.net/rst.html
 
@@ -84,6 +84,12 @@ py -m build --wheel
 # 上传
 
 - https://zhuanlan.zhihu.com/p/682004873
+
+## Defining the Python version required
+
+```shell
+py -m pip install --upgrade twine
+```
 
 ## 上传到TestPyPI
 

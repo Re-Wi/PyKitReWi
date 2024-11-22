@@ -4,3 +4,5 @@ PySide6
 pytz
 jinja2
 pytz
+build
+twine

@@ -18,7 +18,7 @@ from jinja2 import Template, FileSystemLoader, Environment
 # print(result)
 
 # 配置jinja模板
-from utils.filePathHelper import EnsureFolders
+from .filePathHelper import EnsureFolders
 
 template_path = os.path.join(os.path.dirname(__file__), "../data/template")
 jinja_env = Environment(

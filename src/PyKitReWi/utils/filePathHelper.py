@@ -1,4 +1,17 @@
 # -*- coding: utf-8 -*-
+"""
+File: filePathHelper.py
+Author: RejoiceWindow,ReWi
+Email: RejoiceWindow@yeah.com
+Date: 2024-07-07
+Description: ...
+Version: 0.0.0
+"""
+
+# 版权信息
+# Copyright (c) 2024 John Doe. All rights reserved.
+# Licensed under the MIT License.
+
 import os
 import shutil
 
