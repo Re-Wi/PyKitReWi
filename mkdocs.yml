@@ -1,0 +1,27 @@
+site_name: PyKitReWi
+site_url: https://rewi.xyz
+
+# 自动文档化的代码路径
+nav:
+  - Home: index.md
+  - Development: develop.md
+  - Structure: structure.md
+  - PyKitReWi:
+      - apps: src/PyKitReWi/apps
+      - sample: src/PyKitReWi/sample
+      - servers: src/PyKitReWi/servers
+      - utils: src/PyKitReWi/utils
+plugins:
+  - mkdocstrings:
+      enable_inventory: false
+      extra_python_path:
+        - src  # 添加 src 目录到 Python 路径
+  - search  # 启用搜索插件
+  - autorefs
+
+theme:
+  name: material
+#theme: readthedocs
+mkdocstrings:
+  default:
+    style: google  # 或者 numpy, pytorch 等

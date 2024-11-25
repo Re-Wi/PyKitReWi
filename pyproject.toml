@@ -131,7 +131,7 @@ dependencies = ["pyyaml", "loguru"]
 # referred to as "extras". For a more extensive definition see:
 # https://packaging.python.org/en/latest/specifications/dependency-specifiers/#extras
 [project.optional-dependencies]
-dev = ["check-manifest"]
+dev = ["check-manifest", "mkdocstrings-python", ]
 test = ["coverage"]
 
 # List URLs that are relevant to your project

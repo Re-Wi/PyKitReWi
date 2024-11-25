@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 """
 @Project    : PyKitReWi
-@File       : globalManager.py.py
+@File       : globalManager.py
 @IDE        : PyCharm
 @Author     : ReWi  # 替换为当前系统用户名（方便开发人员区分）
 @Date       : 2024/11/22 16:50  # 日期和时间精确到秒

@@ -1,4 +1,0 @@
-debug: false
-database:
-  host: localhost
-  port: 5430

@@ -61,4 +61,60 @@ pip install .\dist\PyKitReWi + <Tab 键>
 1. 进入 tests 文件夹
 2. 新建 test_* 文件自测
 
+# 自动文档 MkDocs + mkdocstrings
+
+```shell
+pip install mkdocs mkdocstrings mkdocs-material
+```
+
+## 初始化 MkDocs 配置
+
+```shell
+mkdocs new PyKitReWi
+```
+
+## 构建文档
+
+```shell
+mkdocs build
+```
+
+## 运行本地服务器
+
+```shell
+mkdocs serve
+```
+
+# 自动文档  Sphinx + autodoc
+
+```shell
+pip install sphinx
+```
+
+## 初始化 Sphinx 配置： 在库的根目录下运行：
+
+```shell
+sphinx-quickstart
+```
+
+## 配置 autodoc： 在 conf.py 中添加 autodoc 扩展：
+
+```python
+extensions = ['sphinx.ext.autodoc']
+```
+
+生成文档： 在库代码中为你的函数、类、方法添加 docstring，然后在 Sphinx 的 .rst 文件中使用 autodoc 指令来自动提取这些
+docstring 生成文档
+
+```rst
+.. automodule:: your_module
+   :members:
+```
+
+## 构建文档： 使用以下命令生成 HTML 格式的文档：
+
+```shell
+make html
+```
+
 [程序结构](./structure.md)

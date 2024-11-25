@@ -1,6 +1,0 @@
-{
-  "appname": "MyApp",
-  "version": 1.1,
-  "debug": true,
-  "import": ["conf_override.json"]
-}
