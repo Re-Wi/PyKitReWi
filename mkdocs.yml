@@ -7,17 +7,24 @@ nav:
   - Development: develop.md
   - Structure: structure.md
   - PyKitReWi:
-      - apps: src/PyKitReWi/apps
-      - sample: src/PyKitReWi/sample
-      - servers: src/PyKitReWi/servers
-      - utils: src/PyKitReWi/utils
+      - apps: apps.md
+      - sample: sample.md
+      - servers: servers.md
+      - utils: utils.md
 plugins:
+  - search  # 启用搜索插件
+  - autorefs
   - mkdocstrings:
       enable_inventory: false
       extra_python_path:
         - src  # 添加 src 目录到 Python 路径
-  - search  # 启用搜索插件
-  - autorefs
+  #      enabled: !ENV [ ENABLE_MKDOCSTRINGS, true ]
+  #      custom_templates: templates
+  #      default_handler: python
+  #      handlers:
+  #        python:
+  #          options:
+  #            show_source: false
 
 theme:
   name: material
