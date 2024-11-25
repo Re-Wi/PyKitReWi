@@ -13,3 +13,8 @@
       show_source: false
 
 ```
+
+# 开发软件调试时使用，如：追踪程序运行时间
+
+::: src.PyKitReWi.apps.debugHelper.TimeTracker
+

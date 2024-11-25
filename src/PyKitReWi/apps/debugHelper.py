@@ -29,31 +29,49 @@ from loguru import logger
 
 
 class TimeTracker:
-    def __init__(self, max_count: int = 6):
+    """
+    A class to track execution times of multiple functions and provide performance statistics.
+
+    This class allows you to track the execution time of both synchronous and asynchronous functions.
+    It also stores execution times in a dictionary, logs the times, and provides summary reports.
+
+    Attributes:
+        times (dict): A dictionary where keys are function names (str) and values are lists of execution times (float).
+        max_count (int): The maximum number of execution times to store per function. Older entries are discarded once the limit is reached.
+    """
+
+    def __init__(self, max_count: int = 6) -> None:
         """
-        Initialize a TimeTracker instance that stores execution times for multiple functions.
+        Initializes the TimeTracker instance.
 
         Args:
-            max_count (int): Maximum number of execution times to track for each function.
-                             Once the limit is reached, older entries are discarded.
+            max_count (int): The maximum number of execution times to store per function. Default is 6.
+                             If the limit is exceeded, older execution times are discarded.
 
         Attributes:
-            times (dict): A dictionary where keys are function names (str) and values are lists of execution times (float).
-            max_count (int): The maximum number of entries to keep for each function.
+            times (dict): Stores execution times for each tracked function.
+            max_count (int): Maximum number of entries to store per function.
         """
         self.times: Dict[str, List[float]] = {}
         self.max_count = max_count
 
     def track_time(self, func: Callable) -> Callable:
         """
-        Decorator function that wraps a given function (synchronous or asynchronous)
-        and tracks its execution time.
+        A decorator that tracks the execution time of a function (either synchronous or asynchronous).
+
+        This decorator wraps the given function and records its execution time. It works with both
+        synchronous and asynchronous functions.
 
         Args:
-            func (Callable): The function whose execution time is to be tracked.
+            func (Callable): The function whose execution time will be tracked.
 
         Returns:
             Callable: The wrapped function with time-tracking functionality.
+
+        Usage:
+            @tracker.track_time
+            def some_function():
+                # Function code to be executed
         """
 
         @wraps(func)
@@ -81,28 +99,36 @@ class TimeTracker:
         # Return async wrapper if the function is asynchronous, otherwise return sync wrapper
         return async_wrapper if asyncio.iscoroutinefunction(func) else sync_wrapper
 
-    def get_start_time(self) -> (float, str):
+    def get_start_time(self) -> float:
         """
-        Get the current time and a formatted timestamp.
+        Get the current time in seconds since the epoch, which will be used to calculate execution time.
 
         Returns:
             float: The start time in seconds.
-            str: Formatted timestamp.
+
+        Usage:
+            start_time = tracker.get_start_time()
+            # Use start_time to calculate the execution time of a function or code block
         """
         start_time = time.time()
-        # start_timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start_time))
-        return start_time  # , start_timestamp
+        return start_time
 
     def get_exec_time(self, func_name: str, start_time: float) -> float:
         """
-        Calculate execution time and store it in the times dictionary.
+        Calculate and log the execution time of a function.
 
         Args:
-            func_name (str): The name of the function being tracked.
-            start_time (float): The start time in seconds.
+            func_name (str): The name of the function whose execution time is being tracked.
+            start_time (float): The timestamp when the function started executing.
 
         Returns:
-            float: The execution time.
+            float: The execution time in seconds.
+
+        Usage:
+            start_time = tracker.get_start_time()
+            # Execute some function
+            exec_time = tracker.get_exec_time("some_function", start_time)
+            print(f"Execution time: {exec_time:.6f} seconds")
         """
         end_time = time.time()
         exec_time = end_time - start_time
@@ -111,16 +137,18 @@ class TimeTracker:
         logger.info(f"[{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time))}] "
                     f"{func_name} took {exec_time:.6f} seconds to execute")
 
-        # Store the execution time, ensuring the max count is respected
+        # Store the execution time
         self._store_time(func_name, exec_time)
         return exec_time
 
     def _store_time(self, func_name: str, exec_time: float) -> None:
         """
-        Store the execution time in the times dictionary, respecting the max_count limit.
+        Store the execution time in the dictionary of tracked times, ensuring the max_count limit is respected.
+
+        If the number of stored times exceeds max_count, the oldest time entry will be removed.
 
         Args:
-            func_name (str): The name of the function whose execution time is being tracked.
+            func_name (str): The name of the function whose execution time is being stored.
             exec_time (float): The execution time in seconds.
         """
         if func_name not in self.times:
@@ -132,7 +160,13 @@ class TimeTracker:
 
     def log_all_times(self, title="Execution") -> None:
         """
-        Logs the total and average execution times for all tracked functions.
+        Log the total and average execution times for all tracked functions.
+
+        This method provides a summary of execution times for all functions that have been tracked,
+        including total and average times.
+
+        Args:
+            title (str): The title of the log summary (default is "Execution").
         """
         logger.info(f"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {title} --> Summary ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         for func_name, exec_times in self.times.items():
@@ -144,10 +178,14 @@ class TimeTracker:
 
     def log_single_time(self, label_name: str) -> None:
         """
-        Logs the total and average execution time for a specific function.
+        Log the total and average execution time for a specific function.
 
         Args:
             label_name (str): The name of the function whose execution times are to be logged.
+
+        Usage:
+            tracker.log_single_time("some_function")
+            # Logs the total and average execution time for 'some_function'
         """
         if label_name in self.times:
             exec_times = self.times[label_name]
@@ -160,13 +198,17 @@ class TimeTracker:
 
     def get_total_time(self, label_name: str) -> float:
         """
-        Retrieves the total execution time for a specific function.
+        Retrieve the total execution time for a specific function.
 
         Args:
             label_name (str): The name of the function whose execution times are to be retrieved.
 
         Returns:
             float: The total execution time for the function. Returns 0 if no data is found.
+
+        Usage:
+            total_time = tracker.get_total_time("some_function")
+            print(f"Total execution time: {total_time:.6f} seconds")
         """
         if label_name in self.times:
             exec_times = self.times[label_name]
@@ -179,10 +221,10 @@ class TimeTracker:
     @contextmanager
     def time_code_block(self, label: str):
         """
-        Context manager to simplify tracking execution time of code blocks.
+        Context manager to track the execution time of code blocks.
 
         Args:
-            label (str): Label for the code block.
+            label (str): The label to associate with the code block.
 
         Usage:
             with tracker.time_code_block("block_name"):

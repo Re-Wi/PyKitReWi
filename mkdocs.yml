@@ -26,9 +26,9 @@ plugins:
   #          options:
   #            show_source: false
 
-theme:
-  name: material
-#theme: readthedocs
+#theme:
+#  name: material
+theme: readthedocs
 mkdocstrings:
   default:
     style: google  # 或者 numpy, pytorch 等

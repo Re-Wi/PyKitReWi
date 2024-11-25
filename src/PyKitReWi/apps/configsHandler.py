@@ -29,6 +29,17 @@ from ..utils.constants import DEFAULT_CONFIG
 def Dict2Namespace(namespace, config):
     """
     Recursively convert a dictionary to a namespace object.
+
+    This function traverses the given dictionary and recursively converts
+    it into an argparse.Namespace object, allowing access to configuration
+    values via dot notation (e.g., `namespace.key`).
+
+    Args:
+        namespace (argparse.Namespace): The namespace object to update (if None, a new Namespace is created).
+        config (dict): The dictionary containing configuration values.
+
+    Returns:
+        argparse.Namespace: The updated namespace with values from the dictionary.
     """
     if namespace is None:
         namespace = argparse.Namespace()
@@ -44,43 +55,50 @@ def Dict2Namespace(namespace, config):
 
 class ConfigsHandler:
     """
-    A handler class for loading configuration files (YAML, JSON, TOML).
-    Supports default config, auto-search, and imports.
+    A handler class for loading and managing configuration files (YAML, JSON, TOML).
+
+    Supports loading a default configuration, searching for configuration
+    files in specified directories, and handling recursive imports from
+    configuration files.
+
+    Attributes:
+        file_dir (str): The default directory for configuration files.
+        namespace (argparse.Namespace): The namespace to hold the configuration values.
     """
-    file_dir = 'data/config/'  # Default directory
+    file_dir = 'data/config/'  # Default directory for configuration files
     namespace = argparse.Namespace()
 
     def __init__(self, file_path="", autoSearch=False):
         """
-        Initialize the configuration handler, loading the config from the specified file path,
-        or default directory, or by enabling auto search.
+        Initializes the configuration handler and loads configurations
+        from the specified file or directory.
 
-        :param file_path: Path to the config file (optional). If not provided, defaults to 'conf.yaml' in default directory.
-        :param autoSearch: If True, enables searching the current directory for YAML files to load.
+        Args:
+            file_path (str, optional): The path to a specific configuration file.
+                If not provided, the default directory or auto-search is used.
+            autoSearch (bool, optional): If True, enables searching the current
+                directory for configuration files. Defaults to False.
         """
-        # Initialize with default config
+        # Initialize with the default configuration
         self.configs = Dict2Namespace(self.namespace, DEFAULT_CONFIG)
 
         # Priority check for file_path, then default directory or auto-search
         if file_path and os.path.exists(file_path):
-            # If file_path is provided and the file exists, load the specified file
             self._load_config_file(file_path)
         else:
-            # If file_path is not provided, check the default directory for conf.* file
             config_files = glob.glob(os.path.join(self.file_dir, "conf.*"))
-
             if config_files:
-                # If conf.* exists in the default directory, load the first matching file
                 self._load_config_file(config_files[0])
 
-        # If autoSearch is enabled, search the current directory for any config files
         if autoSearch:
             self._search_and_load_files(os.getcwd())
 
     def _search_and_load_files(self, search_dir):
         """
         Search for all configuration files in the specified directory and load them.
-        :param search_dir: Directory to search for configuration files (YAML, JSON, TOML).
+
+        Args:
+            search_dir (str): The directory to search for configuration files (YAML, JSON, TOML).
         """
         config_files = [f for f in os.listdir(search_dir) if f.endswith(('.yaml', '.json', '.toml'))]
 
@@ -94,8 +112,10 @@ class ConfigsHandler:
 
     def _load_config_file(self, file_path):
         """
-        Load a configuration file (YAML, JSON, or TOML) and update the configuration.
-        :param file_path: Path to the configuration file.
+        Load a configuration file (YAML, JSON, or TOML) and update the current configuration.
+
+        Args:
+            file_path (str): The path to the configuration file.
         """
         file_extension = os.path.splitext(file_path)[1].lower()
 
@@ -114,46 +134,40 @@ class ConfigsHandler:
     def _load_yaml_file(self, file_path):
         """
         Load a YAML file and update the configuration.
-        :param file_path: Path to the YAML file.
+
+        Args:
+            file_path (str): The path to the YAML configuration file.
         """
         import yaml
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 config = yaml.load(f, Loader=yaml.FullLoader)
-                # 更新现有的配置，避免覆盖
                 updated_config = {**vars(self.configs), **config}
 
-                # 递归将字典转为 Namespace 对象
                 self.configs = Dict2Namespace(self.namespace, updated_config)
-
-                # 如果配置文件中有 'import' 字段，处理递归加载
                 self._load_imports(config, os.path.dirname(file_path))
         except FileNotFoundError:
             print(f"Error: The file {file_path} does not exist.")
         except yaml.YAMLError as e:
-            print(f"Error: Failed to decode yaml from {file_path}: {e}")
+            print(f"Error: Failed to decode YAML from {file_path}: {e}")
         except Exception as e:
             print(f"Error: An unexpected error occurred while loading {file_path}: {e}")
 
     def _load_json_file(self, file_path):
         """
         Load a JSON file and update the configuration.
-        :param file_path: Path to the JSON file.
+
+        Args:
+            file_path (str): The path to the JSON configuration file.
         """
         import json
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 config = json.load(f)
-
-                # 更新现有的配置，避免覆盖
                 updated_config = {**vars(self.configs), **config}
 
-                # 递归将字典转为 Namespace 对象
                 self.configs = Dict2Namespace(self.namespace, updated_config)
-
-                # 如果配置文件中有 'import' 字段，处理递归加载
                 self._load_imports(config, os.path.dirname(file_path))
-
         except FileNotFoundError:
             print(f"Error: The file {file_path} does not exist.")
         except json.JSONDecodeError as e:
@@ -164,23 +178,19 @@ class ConfigsHandler:
     def _load_toml_file(self, file_path):
         """
         Load a TOML file and update the configuration.
-        :param file_path: Path to the TOML file.
+
+        Args:
+            file_path (str): The path to the TOML configuration file.
         """
         import tomli
 
         try:
-            # 以二进制模式打开文件
-            with open(file_path, 'rb') as f:  # 注意这里的 'rb'
-                config = tomli.load(f)  # 使用 tomli 解析 TOML 文件
-
-                # 更新配置，避免覆盖现有配置
+            with open(file_path, 'rb') as f:
+                config = tomli.load(f)
                 updated_config = {**vars(self.configs), **config}
 
-                # 使用 Dict2Namespace 将字典转换为命名空间对象
                 self.configs = Dict2Namespace(self.namespace, updated_config)
-                # 检查 TOML 配置中的 'import' 字段并递归加载
                 self._load_imports(config, os.path.dirname(file_path))
-
         except FileNotFoundError:
             print(f"Error: The file {file_path} does not exist.")
         except tomli.TOMLDecodeError as e:
@@ -190,9 +200,11 @@ class ConfigsHandler:
 
     def _load_imports(self, config, base_dir):
         """
-        Check and load configuration files specified in the 'import' field within a config.
-        :param config: The loaded configuration.
-        :param base_dir: The base directory where the config file was located.
+        Check and recursively load configuration files specified in the 'import' field.
+
+        Args:
+            config (dict): The loaded configuration dictionary.
+            base_dir (str): The directory where the configuration file is located.
         """
         if 'import' in config:
             for import_file in config['import']:
@@ -204,9 +216,13 @@ class ConfigsHandler:
 
     def add_config_file(self, file_path):
         """
-        Dynamically add a new configuration file to the configuration.
-        :param file_path: Path to the configuration file to be added.
-        :return: True if the file was successfully added, False otherwise.
+        Dynamically add a new configuration file to the current configuration.
+
+        Args:
+            file_path (str): The path to the configuration file to be added.
+
+        Returns:
+            bool: True if the file was successfully added, False otherwise.
         """
         if os.path.exists(file_path):
             self._load_config_file(file_path)
@@ -218,12 +234,15 @@ class ConfigsHandler:
     def __getattr__(self, name):
         """
         Allows direct access to configuration attributes, specific to this instance.
-        For example, `config_handler.someConfigKey` will work directly if `someConfigKey` is in the config.
-        This does not affect other instances of the class.
 
-        :param name: The attribute name to access.
-        :return: The value of the attribute if it exists in the config.
-        :raises AttributeError: If the attribute is not found.
+        Args:
+            name (str): The attribute name to access.
+
+        Returns:
+            The value of the attribute if it exists in the configuration.
+
+        Raises:
+            AttributeError: If the attribute is not found in the configuration.
         """
         if hasattr(self.configs, name):
             return getattr(self.configs, name)
