@@ -1,0 +1,5 @@
+appname: MyApp
+version: 1.0
+debug: true
+import:
+  - conf_override.yaml
