@@ -18,3 +18,6 @@
 
 ::: src.PyKitReWi.apps.debugHelper.TimeTracker
 
+# 日志记录器
+
+::: src.PyKitReWi.apps.debugHelper.logsRecorder
