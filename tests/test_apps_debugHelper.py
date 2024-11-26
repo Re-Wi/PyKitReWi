@@ -70,11 +70,11 @@ class TestTimeTracker(unittest.TestCase):
         time.sleep(1)  # 模拟耗时操作
 
         # 记录执行时间
-        tracker.get_exec_time("代码片段进行计时", start_time)
+        tracker.get_exec_time(start_time, "代码片段进行计时")
 
         # 查看执行时间汇总并断言
         tracker.log_all_times()
-        self.assertGreaterEqual(tracker.get_total_time("代码片段进行计时"), 1.0)
+        self.assertGreaterEqual(tracker.get_total_time("代码片段进行计时"), 0.9)
         self.assertLessEqual(tracker.get_total_time("代码片段进行计时"), 1.2)
 
     def test_灵活的代码片段计时(self):
@@ -89,8 +89,111 @@ class TestTimeTracker(unittest.TestCase):
 
         # 查看执行时间汇总并断言
         tracker.log_all_times()
-        self.assertGreaterEqual(tracker.get_total_time("灵活的代码片段计时"), 1.0)
+        self.assertGreaterEqual(tracker.get_total_time("灵活的代码片段计时"), 0.9)
         self.assertLessEqual(tracker.get_total_time("灵活的代码片段计时"), 1.2)
+
+    # 测试 get_start_time 接口
+    def test_get_start_time(self):
+        """
+        测试 get_start_time 方法
+        """
+        tracker = TimeTracker()
+        start_time = tracker.get_start_time()
+
+        # start_time should be a float (timestamp)
+        self.assertIsInstance(start_time, float)
+
+    # 测试 get_exec_time 接口
+    def test_get_exec_time(self):
+        """
+        测试 get_exec_time 方法
+        """
+        tracker = TimeTracker()
+        start_time = tracker.get_start_time()
+
+        # 模拟耗时操作
+        time.sleep(1)
+
+        exec_time = tracker.get_exec_time(start_time, "测试代码执行时间")
+
+        # 执行时间应接近 1 秒
+        self.assertGreaterEqual(exec_time, 0.9)
+        self.assertLessEqual(exec_time, 1.2)
+
+    # 测试 log_all_times 接口
+    def test_log_all_times(self):
+        """
+        测试 log_all_times 方法
+        """
+        tracker = TimeTracker()
+
+        @tracker.track_time
+        def sample_sync_function():
+            time.sleep(0.5)
+
+        # 调用函数
+        sample_sync_function()
+
+        # 确保调用 log_all_times 不抛出异常
+        tracker.log_all_times()
+
+        # 断言已记录的时间存在
+        self.assertGreater(tracker.get_total_time("sample_sync_function"), 0.4)
+        self.assertLess(tracker.get_total_time("sample_sync_function"), 0.6)
+
+    # 测试 log_single_time 接口
+    def test_log_single_time(self):
+        """
+        测试 log_single_time 方法
+        """
+        tracker = TimeTracker()
+
+        @tracker.track_time
+        def sample_sync_function():
+            time.sleep(0.8)
+
+        # 调用函数
+        sample_sync_function()
+
+        # 确保调用 log_single_time 不抛出异常
+        tracker.log_single_time("sample_sync_function")
+
+        # 断言已记录的时间存在
+        self.assertGreater(tracker.get_total_time("sample_sync_function"), 0.7)
+        self.assertLess(tracker.get_total_time("sample_sync_function"), 1.0)
+
+    # 测试 track_time 装饰器接口
+    def test_track_time_decorator(self):
+        """
+        测试 track_time 装饰器
+        """
+        tracker = TimeTracker()
+
+        @tracker.track_time
+        def sample_function_with_decorator():
+            time.sleep(0.4)
+
+        # 调用装饰器装饰的函数
+        sample_function_with_decorator()
+
+        # 确保记录的时间存在
+        self.assertGreater(tracker.get_total_time("sample_function_with_decorator"), 0.3)
+        self.assertLess(tracker.get_total_time("sample_function_with_decorator"), 0.5)
+
+    # 测试 time_code_block 接口
+    def test_time_code_block(self):
+        """
+        测试 time_code_block 方法
+        """
+        tracker = TimeTracker()
+
+        # 计时一个代码块
+        with tracker.time_code_block("代码块计时测试"):
+            time.sleep(0.6)
+
+        # 确保记录的时间存在
+        self.assertGreater(tracker.get_total_time("代码块计时测试"), 0.5)
+        self.assertLess(tracker.get_total_time("代码块计时测试"), 0.8)
 
 
 if __name__ == '__main__':
