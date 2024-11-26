@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch
-from src.PyKitReWi.utils.configsHandler import ConfigsHandler
+from src.PyKitReWi.apps.configsHandler import ConfigsHandler
 from src.PyKitReWi.utils.example_class import ExampleCallableClass
 from src.PyKitReWi.apps.globalManager import GlobalInstanceManager
 
@@ -49,8 +49,7 @@ class TestGlobalInstanceManager(unittest.TestCase):
         """
         测试配置文件的实例化与共享。
         """
-        configHandler = ConfigsHandler()
-        configHandler.LoadData(file_path='../data/config/conf.yaml')
+        configHandler = ConfigsHandler(file_path='../data/config/conf.yaml')
 
         # 保存实例
         self.instance_manager.save_instance(configHandler)

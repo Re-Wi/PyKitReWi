@@ -81,8 +81,8 @@ class LogsRecorder:
         Usage:
             logger_id = log_recorder.init_logger()  # Initializes the logger and sets up configurations.
         """
-        # Remove any existing default logger
-        logger.remove()
+        # Remove any existing default logger, the console will not appear, just save to file
+        # logger.remove()
 
         # Add a new logger with rotation, retention, and compression
         log_id: int = logger.add(self.log_filepath,
