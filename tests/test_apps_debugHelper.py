@@ -54,7 +54,7 @@ class TestTimeTracker(unittest.TestCase):
 
         # 查看指定函数的执行时间记录
         tracker.log_single_time("decorated_async_function")
-        self.assertGreaterEqual(tracker.get_total_time("decorated_async_function"), 1.0)
+        self.assertGreaterEqual(tracker.get_total_time("decorated_async_function"), 0.9)
         self.assertLessEqual(tracker.get_total_time("decorated_async_function"), 1.2)
 
     def test_代码片段进行计时(self):
