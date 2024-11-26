@@ -101,28 +101,35 @@ class TimeTracker:
 
     def get_start_time(self) -> float:
         """
-        Get the current time in seconds since the epoch, which will be used to calculate execution time.
+        Get the current time in seconds since the epoch with high precision, which will be used to calculate execution time.
 
         Returns:
-            float: The start time in seconds.
+        float: The start time in seconds with microsecond precision.
 
         Usage:
             start_time = tracker.get_start_time()
             # Use start_time to calculate the execution time of a function or code block
+            tracker.get_exec_time("label_name", start_time)
         """
-        start_time = time.time()
+        start_time = time.perf_counter()  # High-precision timer
+        # Get the time in seconds and format it to include microseconds
+        local_time = time.localtime(start_time)
+        formatted_time = time.strftime('%Y-%m-%d %H:%M:%S', local_time) + f".{int((start_time % 1) * 1_000_000):06d}"
+
+        # Log the start time with full precision
+        logger.debug(f"Start time: {formatted_time} (Epoch time: {start_time:.6f} seconds)")
         return start_time
 
     def get_exec_time(self, func_name: str, start_time: float) -> float:
         """
-        Calculate and log the execution time of a function.
+        Calculate and log the execution time of a function with microsecond precision.
 
         Args:
             func_name (str): The name of the function whose execution time is being tracked.
             start_time (float): The timestamp when the function started executing.
 
         Returns:
-            float: The execution time in seconds.
+            float: The execution time in seconds, including microsecond precision.
 
         Usage:
             start_time = tracker.get_start_time()
@@ -130,12 +137,12 @@ class TimeTracker:
             exec_time = tracker.get_exec_time("some_function", start_time)
             print(f"Execution time: {exec_time:.6f} seconds")
         """
-        end_time = time.time()
+        end_time = time.perf_counter()  # Use perf_counter for high-precision timing
         exec_time = end_time - start_time
 
-        # Log the execution time
-        logger.info(f"[{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time))}] "
-                    f"{func_name} took {exec_time:.6f} seconds to execute")
+        # Log the execution time with microsecond precision
+        logger.debug(f"[{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time))}] "
+                     f"{func_name} took {exec_time:.6f} seconds to execute")
 
         # Store the execution time
         self._store_time(func_name, exec_time)
@@ -163,18 +170,32 @@ class TimeTracker:
         Log the total and average execution times for all tracked functions.
 
         This method provides a summary of execution times for all functions that have been tracked,
-        including total and average times.
+        including the total and average times. It is useful for getting an overview of the performance
+        of multiple functions that have been measured.
 
         Args:
-            title (str): The title of the log summary (default is "Execution").
+            title (str): The title of the log summary. The default value is "Execution".
+                         You can pass a custom title to differentiate between different reports.
+
+        Usage:
+            tracker.log_all_times()
+            tracker.log_all_times(title="Custom Execution Summary")
         """
-        logger.info(f"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {title} --> Summary ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        # Log the start of the summary with the provided title
+        logger.debug(f"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {title} --> Summary ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+
+        # Iterate over all tracked functions and their execution times
         for func_name, exec_times in self.times.items():
-            total_time = sum(exec_times)
-            avg_time = total_time / len(exec_times)
-            logger.info(
-                f"Function: {func_name: <20} \t| Total Time: {total_time:.6f}s \t| Average Time: {avg_time:.6f}s")
-        logger.info("=================================================================================================")
+            total_time = sum(exec_times)  # Calculate the total execution time for the function
+            avg_time = total_time / len(exec_times)  # Calculate the average execution time
+
+            # Log the total and average execution times for each function
+            logger.debug(
+                f"Function: {func_name: <20} \t| Total Time: {total_time:.6f}s \t| Average Time: {avg_time:.6f}s"
+            )
+
+        # Log the end of the summary
+        logger.debug("===============================================================================================")
 
     def log_single_time(self, label_name: str) -> None:
         """
@@ -191,28 +212,41 @@ class TimeTracker:
             exec_times = self.times[label_name]
             total_time = sum(exec_times)
             avg_time = total_time / len(exec_times)
-            logger.info(
+            logger.debug(
                 f"Function: {label_name: <20} \t| Total Time: {total_time:.6f}s \t| Average Time: {avg_time:.6f}s")
         else:
             logger.warning(f"No data found for function: {label_name}")
 
-    def get_total_time(self, label_name: str) -> float:
+    def get_total_time(self, label_name: str, log_time: bool = True) -> float:
         """
-        Retrieve the total execution time for a specific function.
+        Retrieve the total execution time for a specific function with detailed logging options.
 
         Args:
             label_name (str): The name of the function whose execution times are to be retrieved.
+            log_time (bool): Whether to log the start time with detailed precision (default is True).
 
         Returns:
             float: The total execution time for the function. Returns 0 if no data is found.
 
         Usage:
-            total_time = tracker.get_total_time("some_function")
-            print(f"Total execution time: {total_time:.6f} seconds")
+            tracker.get_total_time("some_function", log_time=True)
+            total_time = tracker.get_total_time("some_function", log_time=False)
         """
         if label_name in self.times:
             exec_times = self.times[label_name]
             total_time = sum(exec_times)  # 计算总时间
+
+            if log_time:
+                # Log the timestamp with year, month, day, hour, minute, second, millisecond, and microsecond
+                start_time = time.perf_counter()  # High-precision timer
+                local_time = time.localtime(start_time)
+                formatted_time = time.strftime('%Y-%m-%d %H:%M:%S', local_time) + \
+                                 f".{int((start_time % 1) * 1_000_000):06d}"
+
+                # Log the total time along with the timestamp
+                logger.debug(f"Total time for '{label_name}': {total_time:.6f} seconds "
+                             f"({formatted_time})")
+
             return total_time
         else:
             logger.warning(f"No data found for function: {label_name}")
