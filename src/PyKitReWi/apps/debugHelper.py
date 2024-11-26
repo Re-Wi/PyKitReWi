@@ -40,7 +40,7 @@ class TimeTracker:
         max_count (int): The maximum number of execution times to store per function. Older entries are discarded once the limit is reached.
     """
 
-    def __init__(self, max_count: int = 6) -> None:
+    def __init__(self, max_count: int = 33) -> None:
         """
         Initializes the TimeTracker instance.
 
@@ -77,7 +77,7 @@ class TimeTracker:
         @wraps(func)
         async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
             """Wrapper for asynchronous functions."""
-            start_time = self.get_start_time()
+            start_time = self.get_start_time(log_time=False)
 
             # Execute the original function asynchronously
             result = await func(*args, **kwargs)
@@ -88,7 +88,7 @@ class TimeTracker:
         @wraps(func)
         def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
             """Wrapper for synchronous functions."""
-            start_time = self.get_start_time()
+            start_time = self.get_start_time(log_time=False)
 
             # Execute the original function
             result = func(*args, **kwargs)
@@ -106,7 +106,7 @@ class TimeTracker:
         """
         Get the current time in seconds since the epoch with high precision, which will be used to calculate execution time.
 
-        Optionally, logs the start time with a custom label if provided.
+        Optionally, logs the start time with microsecond precision if log_time is True.
 
         Args:
             log_time (bool): A flag to determine whether to log the start time.
@@ -117,24 +117,23 @@ class TimeTracker:
             float: The start time in seconds with microsecond precision.
 
         Usage:
-            # Usage Example 1: Get start time and log it
+            # Example 1: Get start time and log it
             start_time = tracker.get_start_time(log_time=True)  # Logs the start time
-            # You can use the start_time to calculate execution times
-            tracker.get_exec_time(start_time, "function_with_log")
 
-            # Usage Example 2: Get start time without logging
+            # Example 2: Get start time without logging
             start_time = tracker.get_start_time(log_time=False)  # Does not log the start time
-            # You can still use start_time for tracking or calculating execution times
-            tracker.get_exec_time(start_time, "function_without_log")
         """
-        start_time = time.perf_counter()  # High-precision timer
+        # Get high-precision start time
+        start_time = time.perf_counter()
 
         # Log the start time if log_time is True
         if log_time:
-            # Get the time in seconds and format it to include microseconds
-            local_time = time.localtime(start_time)
+            # Convert start time to local time (in seconds)
+            local_time = time.localtime(time.time())  # Use time.time() for real-world time
             formatted_time = time.strftime('%Y-%m-%d %H:%M:%S',
-                                           local_time) + f".{int((start_time % 1) * 1_000_000):06d}"
+                                           local_time) + f".{int((time.time() % 1) * 1_000_000):06d}"
+
+            # Log the formatted start time with Epoch time
             logger.debug(f"Start time: {formatted_time} (Epoch time: {start_time:.6f} seconds)")
 
         return start_time
@@ -162,19 +161,30 @@ class TimeTracker:
             # With custom label and no logging
             elapsed_time = tracker.get_exec_time(start_time, "custom_label", log_time=False)
         """
-        end_time = time.perf_counter()  # Use perf_counter for high-precision timing
+        # Get the end time using high-precision timer
+        end_time = time.perf_counter()
+
+        # Calculate elapsed time in seconds
         elapsed_time = end_time - start_time
 
         # Log the execution time with microsecond precision if log_time is True
         if log_time:
-            logger.debug(f"[{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time))}] "
-                         f"{label_name} took {elapsed_time:.6f} seconds to execute")
+            # Use time.time() to get current time for accurate logging
+            current_time = time.time()  # Unix epoch time with microsecond precision
+            local_time = time.localtime(current_time)
+            formatted_time = time.strftime('%Y-%m-%d %H:%M:%S',
+                                           local_time) + f".{int((current_time % 1) * 1_000_000):06d}"
+
+            # Log execution time
+            logger.debug(f"[{formatted_time}] {label_name} took {elapsed_time:.6f} seconds")
 
         # Store the execution time
         self._store_time(label_name, elapsed_time)
+
+        # Return the elapsed time for further use
         return elapsed_time
 
-    def log_execution_time(self, start_time: float, label_name: str = "default_label") -> Dict:
+    def log_execution_time(self, start_time: float, label_name: str = "default_label", log_time: bool = True) -> Dict:
         """
         Calculate and log the execution time of a process with microsecond precision.
 
@@ -182,6 +192,8 @@ class TimeTracker:
             start_time (float): The timestamp when the process started executing.
             label_name (str): The label associated with the process whose execution time is being tracked.
                               Defaults to "default_label" if not provided.
+            log_time (bool): Whether to log the execution time. Default is True.
+                             If False, the execution time will not be logged.
 
         Returns:
             Dict: A dictionary containing the calculated execution time, including:
@@ -212,10 +224,16 @@ class TimeTracker:
         seconds, remainder = divmod(remainder, 1)  # Whole seconds
         milliseconds, microseconds = divmod(remainder * 1_000, 1_000)  # Milliseconds and microseconds
 
-        # Log the execution time with microseconds
-        logger.debug(f"[{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time))}] "
-                     f"{label_name} took {int(days)} days {int(hours)} hours {int(minutes)} minutes "
-                     f"{int(seconds)} seconds {int(milliseconds)} milliseconds {int(microseconds)} microseconds")
+        # Log the execution time with microseconds, avoiding 1970 issue
+        if log_time:
+            current_time = time.time()  # Get current time in seconds since epoch
+            local_time = time.localtime(current_time)
+            formatted_time = time.strftime('%Y-%m-%d %H:%M:%S',
+                                           local_time) + f".{int((current_time % 1) * 1_000_000):06d}"
+
+            logger.debug(f"[{formatted_time}] {label_name} took {int(days)} days {int(hours)} hours "
+                         f"{int(minutes)} minutes {int(seconds)} seconds {int(milliseconds)} milliseconds "
+                         f"{int(microseconds)} microseconds")
 
         # Store the execution time
         self._store_time(label_name, elapsed_time)
@@ -268,14 +286,13 @@ class TimeTracker:
         logger.debug(f"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {title} --> Summary ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 
         # Iterate over all tracked functions and their execution times
+        logger.debug(f"           label_name            \t |  Average Time (s)  \t |   Total Time (s)   ")
         for label_name, exec_times in self.times.items():
             total_time = sum(exec_times)  # Calculate the total execution time for the function
             avg_time = total_time / len(exec_times)  # Calculate the average execution time
 
             # Log the total and average execution times for each function
-            logger.debug(
-                f"Function: {label_name: <20} \t| Total Time: {total_time:.6f}s \t| Average Time: {avg_time:.6f}s"
-            )
+            logger.debug(f"{label_name: <33} \t | {avg_time:.6f}s \t | {total_time:.6f}s ")
 
         # Log the end of the summary
         logger.debug("===============================================================================================")
@@ -296,9 +313,9 @@ class TimeTracker:
             total_time = sum(exec_times)
             avg_time = total_time / len(exec_times)
             logger.debug(
-                f"Function: {label_name: <20} \t| Total Time: {total_time:.6f}s \t| Average Time: {avg_time:.6f}s")
+                f"label_name: {label_name: <20} \t | Average Time: {avg_time:.6f}s \t | Total Time: {total_time:.6f}s ")
         else:
-            logger.warning(f"No data found for function: {label_name}")
+            logger.warning(f"No data found for label_name: {label_name}")
 
     def get_total_time(self, label_name: str, log_time: bool = True) -> float:
         """
