@@ -174,20 +174,30 @@ class TimeTracker:
         self._store_time(label_name, elapsed_time)
         return elapsed_time
 
-    def log_execution_time(self, start_time: float, label_name: str = "default_label") -> None:
+    def log_execution_time(self, start_time: float, label_name: str = "default_label") -> Dict:
         """
         Calculate and log the execution time of a process with microsecond precision.
 
         Args:
+            start_time (float): The timestamp when the process started executing.
             label_name (str): The label associated with the process whose execution time is being tracked.
                               Defaults to "default_label" if not provided.
-            start_time (float): The timestamp when the process started executing.
+
+        Returns:
+            Dict: A dictionary containing the calculated execution time, including:
+                - "days" (int): The number of days.
+                - "hours" (int): The number of hours.
+                - "minutes" (int): The number of minutes.
+                - "seconds" (int): The number of seconds.
+                - "milliseconds" (int): The number of milliseconds.
+                - "microseconds" (int): The number of microseconds.
+                - "total_seconds" (float): The total execution time in seconds.
 
         Usage:
             start_time = tracker.get_start_time()
             # Execute some function
-            tracker.log_execution_time(start_time)  # label_name defaults to "default_label"
-            tracker.log_execution_time(start_time, "custom_label")  # Provide custom label
+            execution_times = tracker.log_execution_time(start_time)  # Logs time with default label
+            execution_times = tracker.log_execution_time(start_time, "custom_label")  # Logs time with custom label
         """
         # Get the end time using high-precision timer
         end_time = time.perf_counter()
@@ -209,6 +219,17 @@ class TimeTracker:
 
         # Store the execution time
         self._store_time(label_name, elapsed_time)
+
+        # Return the execution time as a dictionary
+        return {
+            "days": days,
+            "hours": hours,
+            "minutes": minutes,
+            "seconds": seconds,
+            "milliseconds": milliseconds,
+            "microseconds": microseconds,
+            "total_seconds": elapsed_time
+        }
 
     def _store_time(self, label_name: str, exec_time: float) -> None:
         """
