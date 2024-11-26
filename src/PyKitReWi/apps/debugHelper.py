@@ -286,13 +286,14 @@ class TimeTracker:
         logger.debug(f"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ {title} --> Summary ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 
         # Iterate over all tracked functions and their execution times
-        logger.debug(f"           label_name            \t |  Average Time (s)  \t |   Total Time (s)   ")
+        logger.debug(f"           label_name            \t |  Average Time (s)  \t |   Total Time (s) \t | times ")
         for label_name, exec_times in self.times.items():
             total_time = sum(exec_times)  # Calculate the total execution time for the function
-            avg_time = total_time / len(exec_times)  # Calculate the average execution time
+            times = len(exec_times)
+            avg_time = total_time / times  # Calculate the average execution time
 
             # Log the total and average execution times for each function
-            logger.debug(f"{label_name: <33} \t | {avg_time:.6f}s \t | {total_time:.6f}s ")
+            logger.debug(f"{label_name: <33} \t | {avg_time:.6f}s \t | {total_time:.6f}s \t | {times}")
 
         # Log the end of the summary
         logger.debug("===============================================================================================")
@@ -311,9 +312,10 @@ class TimeTracker:
         if label_name in self.times:
             exec_times = self.times[label_name]
             total_time = sum(exec_times)
-            avg_time = total_time / len(exec_times)
+            times = len(exec_times)
+            avg_time = total_time / times
             logger.debug(
-                f"label_name: {label_name: <20} \t | Average Time: {avg_time:.6f}s \t | Total Time: {total_time:.6f}s ")
+                f"label_name: {label_name: <20} \t | Average Time: {avg_time:.6f}s \t | Total Time: {total_time:.6f}s \t | times: {times}")
         else:
             logger.warning(f"No data found for label_name: {label_name}")
 
